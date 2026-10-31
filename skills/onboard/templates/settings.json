@@ -10,14 +10,26 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/forbidden_patterns.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/<lint-changed-file>.sh\"",
-            "timeout": 60
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_changed_file.py\"",
+            "timeout": 90
           }
         ]
       }

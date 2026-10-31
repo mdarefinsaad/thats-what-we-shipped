@@ -6,6 +6,11 @@
     python3 install.py --check      report drift between repo and ~/.claude
     python3 install.py --uninstall  remove installed files, restore backups
 
+    python3 install.py --project <repo> [--force]
+        copy the optional per-project kit (project/skills, project/hooks,
+        project/rules) into <repo>/.claude/. Existing files are kept unless
+        --force. Nothing global changes.
+
 Owned files are recorded in ~/.claude/.factory-manifest.json so uninstall
 removes exactly what install created. settings.json and CLAUDE.md are backed
 up once (first install) as *.pre-factory and restored on uninstall.
@@ -165,8 +170,45 @@ def uninstall() -> None:
     print("Uninstalled.")
 
 
+PROJECT_KIT = (("project/skills", "skills"), ("project/hooks", "hooks"), ("project/rules", "rules"))
+
+
+def install_project(project: str, force: bool) -> None:
+    project = os.path.abspath(os.path.expanduser(project))
+    if not os.path.isdir(project):
+        print(f"not a directory: {project}")
+        sys.exit(2)
+    target_root = os.path.join(project, ".claude")
+    copied = kept = 0
+    for src_name, dst_name in PROJECT_KIT:
+        src_root = os.path.join(REPO, src_name)
+        for dirpath, _dirs, files in os.walk(src_root):
+            for name in files:
+                if name.startswith(".") or name.endswith(".pyc"):
+                    continue
+                src = os.path.join(dirpath, name)
+                rel = os.path.relpath(src, src_root)
+                dst = os.path.join(target_root, dst_name, rel)
+                if os.path.exists(dst) and not force:
+                    state = "same" if filecmp.cmp(src, dst, shallow=False) else "kept (differs; --force to overwrite)"
+                    kept += 1
+                else:
+                    os.makedirs(os.path.dirname(dst), exist_ok=True)
+                    shutil.copy2(src, dst)
+                    if dst_name == "hooks":
+                        os.chmod(dst, os.stat(dst).st_mode | stat.S_IXUSR)
+                    state = "copied"
+                    copied += 1
+                print(f"  [{state}] .claude/{dst_name}/{rel}")
+    print(f"Project kit → {target_root}: {copied} copied, {kept} already present.")
+
+
 def main() -> None:
-    args = set(sys.argv[1:])
+    argv = sys.argv[1:]
+    if argv[:1] == ["--project"] and len(argv) in (2, 3) and (len(argv) == 2 or argv[2] == "--force"):
+        install_project(argv[1], force=len(argv) == 3)
+        return
+    args = set(argv)
     if args - {"--dry-run", "--check", "--uninstall"} or len(args) > 1:
         print(__doc__)
         sys.exit(2)

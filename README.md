@@ -15,7 +15,7 @@ Michael (you + main session, opus)   plans, gates, explains, writes planning fil
 
 ```bash
 cd ~/arefin/thats-what-we-shipped
-python3 -m unittest -q tests/test_hooks.py tests/test_bash_policy.py   # guards must pass first
+python3 -m unittest discover -s tests -q   # all guards must pass first
 python3 install.py --dry-run                   # show what would change
 python3 install.py                             # copy into ~/.claude, merge settings
 python3 install.py --check                     # drift between repo and ~/.claude
@@ -26,6 +26,8 @@ What install does: copies `agents/`, `skills/`, `hooks/` and `CLAUDE.md` into `~
 
 Edit the repo, never `~/.claude/` directly: installed copies are overwritten on the next install, and the global ask rule prompts before any agent touches them.
 
+Per-project skills and hooks live under `project/` and are installed differently; see the section below.
+
 ## Daily use
 
 | Situation | Type |
@@ -35,11 +37,48 @@ Edit the repo, never `~/.claude/` directly: installed copies are overwritten on 
 | Feature or non-trivial change | `/factory <request>` |
 | Small, well-understood fix | `/quickfix <symptom>` |
 | Unfinished plan from an earlier session | `continue docs/planning/plans/<name>.md` |
+| Inside a repo, after `/onboard` | `/brainstorm`, `/root-cause`, `/tdd`, `/sync-docs`, `/verify` (see next section) |
 | Commit / push / PR / migration / deploy | ask for it explicitly; it is never part of a stage |
 
 The gates, in order: plan (quotes the authorized implementation checks) → implementation → tests → review → stop. After tests and after review you decide: fix, continue, or stop. "Fix" approves edits only; say "fix, test and re-review" to bundle. Two review-fix cycles maximum, then a final verification with no edits.
 
 Monitoring: terminal output, the statusline, the plan file's ticks and Approvals table, and a macOS banner when a turn finishes, fails, or needs you.
+
+## Per-project skills and hooks (the `project/` kit)
+
+Global skills are installed once and behave the same everywhere. The kit is different: it is copied **into a repo** and then made specific to that repo by `/onboard`.
+
+```
+project/skills/   → <repo>/.claude/skills/
+project/hooks/    → <repo>/.claude/hooks/
+project/rules/    → <repo>/.claude/rules/
+```
+
+```bash
+python3 install.py --project ~/path/to/repo            # copy; keeps files that already exist
+python3 install.py --project ~/path/to/repo --force    # copy; overwrites them
+```
+
+Then run `/onboard` in that repo. Every kit skill opens with a `## Project facts` block of `<placeholders>`; `/onboard` inspects the repo, fills them with real paths and commands, shows the diff, and writes on approval. A placeholder it cannot fill stays as `<…>` and is reported, never invented.
+
+| Skill | What it does | What `/onboard` fills in |
+|---|---|---|
+| `/brainstorm <idea>` | Idea → 2–3 approaches → spec + plan files → approval → build. Lighter than `/factory`, no sub-agents | docs to read first, request path / layering, final check commands, non-negotiable rules |
+| `/root-cause <symptom>` | Reproduce, gather evidence, confirm the earliest point of failure, explain plainly, stop before fixing | log file and the grep for one request, tables that record requests, single-test and suite commands, what counts as sensitive data |
+| `/tdd <behavior>` | Red → green → refactor with the project's runner; stops if the area has no runner | areas with a runner, test folders and layout, single-file and suite commands, test style, rules a change most often breaks |
+| `/sync-docs [since]` | Diff the main branch since the last sync, map changed files to CLAUDE.md, rules and docs pages, propose edits for approval | main branch, docs folder, the CLAUDE.md files, command/tooling config files |
+| `/verify` | How to launch the app and drive it to see a change working | launch command and ready line, smoke check, steps to reach a change, where to look, cleanup |
+
+Hooks in the kit are generic scripts driven by the repo's `.claude/factory.json` (template: `skills/onboard/templates/factory.json`):
+
+| Hook | Event | Config key | Behaviour |
+|---|---|---|---|
+| `lint_changed_file.py` | PostToolUse Edit/Write | `lintOnEdit`: glob, cwd, command with `{file}` / `{venv}` | runs the matching linter or formatter on the edited file; non-zero output goes back to Claude |
+| `forbidden_patterns.py` | PreToolUse Edit/Write | `forbiddenPatterns`: glob, regex, message | blocks an edit that would **add** a forbidden construct; existing violations never block |
+
+`factory.json` also carries `testPaths` and `approvedChecks` for the global guards, and `mainBranch` and `docsDir` for `/sync-docs`. `skills/onboard/templates/settings.json` shows the hook wiring. `project/rules/_TEMPLATE.md` shows the `paths:` frontmatter for a path-scoped rule. Tests: `tests/test_project_hooks.py`.
+
+Refreshing a repo after the generic kit improves: `install.py --project <repo> --force`, then `/onboard` again. Filled-in, project-specific copies do not belong in this repo; keep them in a backup repo next to the project.
 
 ## Model policy
 
@@ -100,7 +139,7 @@ Leak prevention: nothing project-specific goes into this repo. Project names, pa
 
 ## Validation checklist (run after install)
 
-1. Guards: `python3 -m unittest -q tests/test_hooks.py tests/test_bash_policy.py` → OK.
+1. Guards: `python3 -m unittest discover -s tests -q` → OK.
 2. Agents visible: in a new session ask Michael to list available agent types; the five names appear.
 3. Model per agent: run Pam on a lookup; the task notification shows the sonnet model id.
 4. Secrets: in a demo repo with `.env` and `.env.example`, `cat .env` is denied, `cat .env.example` is allowed.

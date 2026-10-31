@@ -1,10 +1,38 @@
 {
   "testPaths": [
     "backend/tests/**",
-    "frontend/src/**/*.test.tsx",
-    "frontend/src/**/*.test.ts"
+    "frontend/src/**/*.test.{ts,tsx}"
   ],
   "approvedChecks": [
     "npm run build"
+  ],
+  "mainBranch": "main",
+  "docsDir": "docs/wiki",
+  "lintOnEdit": [
+    {
+      "glob": "backend/**/*.py",
+      "cwd": "backend",
+      "venv": ".venv/bin",
+      "command": "{venv}/ruff check --fix --unfixable F401 --select F --no-cache --quiet {file}; {venv}/ruff format --no-cache {file} && {venv}/ruff check --select F --output-format concise --no-cache {file}"
+    },
+    {
+      "glob": "frontend/src/**/*.{ts,tsx}",
+      "cwd": "frontend",
+      "command": "npx --no-install eslint --quiet {file}"
+    }
+  ],
+  "forbiddenPatterns": [
+    {
+      "glob": "backend/app/**/*.py",
+      "pattern": "^\\s*print\\(",
+      "flags": "m",
+      "message": "no print() — use logging (logger = logging.getLogger(__name__))"
+    },
+    {
+      "glob": "backend/app/**/*.py",
+      "pattern": "SELECT\\s+\\*",
+      "flags": "i",
+      "message": "no SELECT * — name the columns"
+    }
   ]
 }
