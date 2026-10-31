@@ -25,12 +25,14 @@ Check every claim against the main branch, never the working tree — it may be 
 
 Skip this step when none of the five bullets under `## Project facts` still holds an angle-bracket placeholder (`<e.g. …>`). Otherwise fill only those bullets; leave filled bullets as they are.
 
-1. Main branch: `git rev-parse --abbrev-ref origin/HEAD` and `git branch -r`. If both `origin/develop` and `origin/main` exist, or `origin/HEAD` does not resolve, ask the user which branch the docs describe; never guess. Store it with the remote prefix, e.g. `origin/develop`.
+1. Main branch: `git rev-parse --abbrev-ref origin/HEAD` and `git branch -r`. If `origin/develop` exists alongside the branch `origin/HEAD` points to, or `origin/HEAD` does not resolve, ask the user which branch the docs describe; never guess. Store it with the remote prefix, e.g. `origin/develop`.
 2. Docs folder: `docs/wiki` if it exists, else `docs`; if neither exists, write `none` (the marker then goes to `docs/.last-sync`, which the header reads).
 3. CLAUDE.md files (Glob `**/CLAUDE.md`), command/tooling config files (e.g. `package.json`, `requirements*.txt`, `pyproject.toml`, `alembic.ini`, `Makefile`), other agent docs (e.g. `AGENTS.md`, or `none`).
 4. Show the filled block as a diff. If there is no override and no last synced commit, ask for the start commit in the same message. Write the block into this file only after the user approves; if they decline, write nothing and stop. Then continue with step 1.
 
 ## 1. Find what changed
+
+If the Main branch fact has no `origin/` prefix (an older setup), read it as `origin/<value>` everywhere below.
 
 1. `git fetch origin <main branch without the origin/ prefix>` (e.g. `git fetch origin develop`).
 2. Base = the override if given, else the last synced commit, else the start commit agreed in step 0. If none exists, stop and ask the user for a start commit.
