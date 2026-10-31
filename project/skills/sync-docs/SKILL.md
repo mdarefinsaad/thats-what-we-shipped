@@ -16,7 +16,7 @@ allowed-tools: Read, Grep, Glob, Bash(git fetch *), Bash(git log *), Bash(git di
 - Command/tooling config files: <e.g. requirements.txt, package.json, alembic.ini — when these change, check the Commands section>
 - Other agent docs: <e.g. AGENTS.md, or "none">
 
-Last synced commit: !`cat "$(ls -d docs/wiki 2>/dev/null || echo docs)/.last-sync" 2>/dev/null || echo "none"`
+Last synced commit: !`cat docs/wiki/.last-sync 2>/dev/null || cat docs/.last-sync 2>/dev/null || echo "none"`
 Start commit override (optional): $ARGUMENTS
 
 Check every claim against the main branch, never the working tree — it may be a feature branch.

@@ -76,7 +76,7 @@ Hooks in the kit are generic scripts driven by the repo's `.claude/factory.json`
 | `lint_changed_file.py` | PostToolUse Edit/Write | `lintOnEdit`: glob, cwd, command with `{file}` / `{venv}` | runs the matching linter or formatter on the edited file; non-zero output goes back to Claude |
 | `forbidden_patterns.py` | PreToolUse Edit/Write | `forbiddenPatterns`: glob, regex, message | blocks an edit that would **add** a forbidden construct; existing violations never block |
 
-`factory.json` also carries `testPaths` and `approvedChecks` for the global guards, and `mainBranch` and `docsDir` for `/sync-docs`. `skills/onboard/templates/settings.json` shows the hook wiring. `project/rules/_TEMPLATE.md` shows the `paths:` frontmatter for a path-scoped rule. Tests: `tests/test_project_hooks.py`.
+`factory.json` also carries `testPaths` and `approvedChecks` for the global guards, and `mainBranch` and `docsDir` for `/sync-docs`. `skills/onboard/templates/settings.json` shows the hook wiring. `project/rules/_TEMPLATE.md` shows the `paths:` frontmatter for a path-scoped rule. Tests: `tests/test_project_hooks.py`, `tests/test_skill_headers.py` (no `$(…)` in skill header commands).
 
 Refreshing a repo after the generic kit improves: `install.py --project <repo> --force`, then `/onboard` again. Filled-in, project-specific copies do not belong in this repo; keep them in a backup repo next to the project.
 
