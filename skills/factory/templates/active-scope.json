@@ -1,0 +1,16 @@
+{
+  "plan": "docs/planning/plans/YYYY-MM-DD-slug.md",
+  "approved_at_gate": 1,
+  "approved_paths": [
+    "backend/app/controllers/example_controller.py",
+    "frontend/src/pages/Example/**"
+  ],
+  "test_paths": [
+    "backend/tests/**",
+    "frontend/src/**/*.test.tsx"
+  ],
+  "authorized_checks": [
+    "cd backend && .venv/bin/python -m pytest tests/controllers/test_example.py -q",
+    "cd frontend && npx tsc --noEmit -p tsconfig.app.json"
+  ]
+}

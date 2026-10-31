@@ -1,0 +1,10 @@
+{
+  "testPaths": [
+    "backend/tests/**",
+    "frontend/src/**/*.test.tsx",
+    "frontend/src/**/*.test.ts"
+  ],
+  "approvedChecks": [
+    "npm run build"
+  ]
+}

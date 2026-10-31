@@ -1,0 +1,116 @@
+{
+  "model": "opus",
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": false
+  },
+  "permissions": {
+    "deny": [
+      "Read(.env*)",
+      "Read(!*.example)",
+      "Read(!*.sample)",
+      "Read(!*.template)",
+      "Read(**/*.pem)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*.jks)",
+      "Read(**/*.keystore)",
+      "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)",
+      "Read(**/id_ecdsa*)",
+      "Read(**/*service-account*.json)",
+      "Read(**/*service_account*.json)",
+      "Read(**/*credentials*.json)",
+      "Read(secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.kube/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.npmrc)",
+      "Read(~/.pypirc)",
+      "Read(~/.netrc)"
+    ],
+    "ask": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git merge *)",
+      "Bash(git rebase *)",
+      "Bash(git reset *)",
+      "Bash(git tag *)",
+      "Bash(alembic upgrade *)",
+      "Bash(alembic downgrade *)",
+      "Bash(alembic stamp *)",
+      "Bash(*alembic upgrade *)",
+      "Bash(*alembic downgrade *)",
+      "Bash(*alembic stamp *)",
+      "Bash(docker push *)",
+      "Bash(docker compose up *)",
+      "Bash(docker-compose up *)",
+      "Bash(kubectl apply *)",
+      "Bash(kubectl delete *)",
+      "Bash(terraform apply *)",
+      "Bash(terraform destroy *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(rsync *)",
+      "Bash(gcloud * deploy *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh release *)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(~/.claude/CLAUDE.md)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/.claude/agents/**)",
+      "Edit(~/.claude/skills/**)",
+      "Edit(~/.claude/rules/**)",
+      "Edit(.claude/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/.claude/hooks/bash_policy.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/notify.sh\" finished",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/notify.sh\" failed",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/notify.sh\" attention",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
