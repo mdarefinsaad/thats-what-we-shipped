@@ -59,14 +59,14 @@ python3 install.py --project ~/path/to/repo            # copy; keeps files that 
 python3 install.py --project ~/path/to/repo --force    # copy; overwrites them
 ```
 
-Then run `/onboard` in that repo. Every kit skill opens with a `## Project facts` block of `<placeholders>`; `/onboard` inspects the repo, fills them with real paths and commands, shows the diff, and writes on approval. A placeholder it cannot fill stays as `<…>` and is reported, never invented.
+Then run `/onboard` in that repo. Every kit skill opens with a `## Project facts` block of `<placeholders>`; `/onboard` inspects the repo, fills them with real paths and commands, shows the diff, and writes on approval. A placeholder it cannot fill stays as `<…>` and is reported, never invented. The exception is `/sync-docs`: `/onboard` leaves its facts blank, and it fills them itself on its first run.
 
 | Skill | What it does | What `/onboard` fills in |
 |---|---|---|
 | `/brainstorm <idea>` | Idea → 2–3 approaches → spec + plan files → approval → build. Lighter than `/factory`, no sub-agents | docs to read first, request path / layering, final check commands, non-negotiable rules |
 | `/root-cause <symptom>` | Reproduce, gather evidence, confirm the earliest point of failure, explain plainly, stop before fixing | log file and the grep for one request, tables that record requests, single-test and suite commands, what counts as sensitive data |
 | `/tdd <behavior>` | Red → green → refactor with the project's runner; stops if the area has no runner | areas with a runner, test folders and layout, single-file and suite commands, test style, rules a change most often breaks |
-| `/sync-docs [since]` | Diff the main branch since the last sync, map changed files to CLAUDE.md, rules and docs pages, propose edits for approval | main branch, docs folder, the CLAUDE.md files, command/tooling config files |
+| `/sync-docs [since]` | Diff the main branch since the last sync, map changed files to CLAUDE.md, rules and docs pages, propose edits for approval | nothing — `/sync-docs` sets its own facts (main branch, docs folder, CLAUDE.md files, config files) on its first run |
 | `/verify` | How to launch the app and drive it to see a change working | launch command and ready line, smoke check, steps to reach a change, where to look, cleanup |
 
 Hooks in the kit are generic scripts driven by the repo's `.claude/factory.json` (template: `skills/onboard/templates/factory.json`):
@@ -76,7 +76,7 @@ Hooks in the kit are generic scripts driven by the repo's `.claude/factory.json`
 | `lint_changed_file.py` | PostToolUse Edit/Write | `lintOnEdit`: glob, cwd, command with `{file}` / `{venv}` | runs the matching linter or formatter on the edited file; non-zero output goes back to Claude |
 | `forbidden_patterns.py` | PreToolUse Edit/Write | `forbiddenPatterns`: glob, regex, message | blocks an edit that would **add** a forbidden construct; existing violations never block |
 
-`factory.json` also carries `testPaths` and `approvedChecks` for the global guards, and `mainBranch` and `docsDir` for `/sync-docs`. `skills/onboard/templates/settings.json` shows the hook wiring. `project/rules/_TEMPLATE.md` shows the `paths:` frontmatter for a path-scoped rule. Tests: `tests/test_project_hooks.py`, `tests/test_skill_headers.py` (no `$(…)` in skill header commands).
+`factory.json` also carries `testPaths` and `approvedChecks` for the global guards. `skills/onboard/templates/settings.json` shows the hook wiring. `project/rules/_TEMPLATE.md` shows the `paths:` frontmatter for a path-scoped rule. Tests: `tests/test_project_hooks.py`, `tests/test_skill_headers.py` (no `$(…)` in skill header commands).
 
 Refreshing a repo after the generic kit improves: `install.py --project <repo> --force`, then `/onboard` again. Filled-in, project-specific copies do not belong in this repo; keep them in a backup repo next to the project.
 

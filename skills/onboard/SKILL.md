@@ -41,15 +41,13 @@ Prepare from `${CLAUDE_SKILL_DIR}/templates/`:
 - The optional, generic project kit from the factory repo: offer it. Copied with `python3 <factory-repo>/install.py --project <this repo>`; existing files are kept.
   - `project/hooks/`: `lint_changed_file.py` and `forbidden_patterns.py` are driven entirely by `factory.json` (`lintOnEdit`, `forbiddenPatterns`); propose entries that match this repo's linters and rules, and the `settings.json` hook wiring from the template.
   - `project/rules/_TEMPLATE.md`: propose a rule file only for an area where an agent would otherwise get something wrong.
-  - `factory.json` also carries `mainBranch` and `docsDir` for `/sync-docs`.
 
 ## 3b. Make the copied skills project-specific
 
-Each copied skill (`brainstorm`, `root-cause`, `tdd`, `sync-docs`, `verify`) starts with a `## Project facts` block of `<placeholders>`. Fill every placeholder from what step 2 found, with real paths and commands from this repo, not generic wording:
+Each copied skill (`brainstorm`, `root-cause`, `tdd`, `verify`) starts with a `## Project facts` block of `<placeholders>`. Fill every placeholder from what step 2 found, with real paths and commands from this repo, not generic wording:
 - `root-cause`: log file and the grep that isolates one request; the tables or files that record requests; single-test and suite commands; what counts as sensitive data here.
 - `tdd`: which areas have a runner; test folders and how they mirror the source; single-file and suite commands with the folder to run from; test style; the rules a change most often breaks.
 - `brainstorm`: the docs to read first; the request path / layering; final check commands per area; the non-negotiable rules.
-- `sync-docs`: main branch; docs folder; the CLAUDE.md files; command/tooling config files; other agent docs.
 - `verify`: launch command and ready line, smoke check, the steps to reach a change, where to look, cleanup.
 
 Show each filled skill as a diff against the copy, write it on approval. Report any placeholder you could not fill, and leave it as `<…>` rather than inventing a value; a skill with unfilled facts says so on its first line, so the user sees it.

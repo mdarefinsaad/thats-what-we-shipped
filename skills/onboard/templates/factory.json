@@ -6,8 +6,6 @@
   "approvedChecks": [
     "npm run build"
   ],
-  "mainBranch": "main",
-  "docsDir": "docs/wiki",
   "lintOnEdit": [
     {
       "glob": "backend/**/*.py",
