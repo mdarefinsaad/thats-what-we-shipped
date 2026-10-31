@@ -8,7 +8,7 @@ Generic. Reads `.claude/factory.json` in the project:
        "command": "{venv}/ruff check --fix --unfixable F401 --select F --quiet {file} && {venv}/ruff format {file} && {venv}/ruff check --select F --output-format concise {file}",
        "venv": ".venv/bin"},
       {"glob": "frontend/src/**/*.{ts,tsx}", "cwd": "frontend",
-       "command": "npx --no-install eslint --quiet {file}"}
+       "command": "npx --no eslint --quiet {file}"}
     ]
 
 For every entry whose glob matches the edited file, the command runs in `cwd`

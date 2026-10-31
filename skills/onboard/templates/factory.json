@@ -16,7 +16,7 @@
     {
       "glob": "frontend/src/**/*.{ts,tsx}",
       "cwd": "frontend",
-      "command": "npx --no-install eslint --quiet {file}"
+      "command": "npx --no eslint --quiet {file}"
     }
   ],
   "forbiddenPatterns": [
